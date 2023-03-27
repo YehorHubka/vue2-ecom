@@ -127,30 +127,32 @@ export default {
   align-items: center;
   gap: 10px;
 }
+.filter-aside {
+  h3 {
+    text-transform: uppercase;
+    font-size: 20px;
+    margin: 0 0 20px;
+  }
+}
+.filter-block {
+  margin-bottom: 20px;
+  &__title {
+    margin-bottom: 10px;
+    font-weight: bold;
+    font-size: 16px;
+  }
+  select {
+    width: 100%;
+    height: 40px;
+    padding: 0 10px;
+    text-transform: uppercase;
+    font-size: 16px;
+  }
+}
 @media (min-width: 1024px) {
   .filter-aside {
     margin: 0 10px;
     width: calc(30% - 20px);
-    h3 {
-      text-transform: uppercase;
-      font-size: 20px;
-      margin: 0 0 20px;
-    }
-  }
-  .filter-block {
-    margin-bottom: 20px;
-    &__title {
-      margin-bottom: 10px;
-      font-weight: bold;
-      font-size: 16px;
-    }
-    select {
-      width: 100%;
-      height: 40px;
-      padding: 0 10px;
-      text-transform: uppercase;
-      font-size: 16px;
-    }
   }
 }
 </style>
