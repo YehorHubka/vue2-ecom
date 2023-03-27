@@ -12,6 +12,10 @@ const routes = [
     path: "/filter/:params?",
     component: () => import("../views/HomeView.vue"),
   },
+  {
+    path: "/:id",
+    component: () => import("../views/ProductView.vue"),
+  },
 ]
 
 const router = new VueRouter({
