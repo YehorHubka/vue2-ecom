@@ -41,31 +41,11 @@ export default {
   },
   methods: {
     ...mapMutations(["sortByCategory", "setSortedProducts", "sortByPrice"]),
-  },
-  watch: {
-    currentCategory(newCategory) {
+    filterChange() {
       this.$router
         .push({
           path: "/filter",
-          query: { category: newCategory, price: this.maxPrice },
-        })
-        .catch((error) => {
-          if (error.name != "NavigationDuplicated") {
-            throw error;
-          }
-        });
-      if (newCategory !== "all") {
-        this.sortByCategory(newCategory);
-      } else {
-        this.setSortedProducts(this.products);
-      }
-      this.sortByPrice(this.maxPrice);
-    },
-    maxPrice(newPrice) {
-      this.$router
-        .push({
-          path: "/filter",
-          query: { category: this.currentCategory, price: newPrice },
+          query: { category: this.currentCategory, price: this.maxPrice },
         })
         .catch((error) => {
           if (error.name != "NavigationDuplicated") {
@@ -77,7 +57,15 @@ export default {
       } else {
         this.setSortedProducts(this.products);
       }
-      this.sortByPrice(newPrice);
+      this.sortByPrice(this.maxPrice);
+    },
+  },
+  watch: {
+    currentCategory() {
+      this.filterChange();
+    },
+    maxPrice() {
+      this.filterChange();
     },
   },
   mounted() {
