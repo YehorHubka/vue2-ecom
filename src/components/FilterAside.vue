@@ -81,18 +81,30 @@ export default {
     },
   },
   mounted() {
-    if ("category" in this.$route.query) {
-      this.currentCategory = this.$route.query.category;
-      if (this.currentCategory !== "all") {
-        this.sortByCategory(this.currentCategory);
-      } else {
-        this.setSortedProducts(this.products);
-      }
-    }
-    if ("price" in this.$route.query) {
-      this.maxPrice = this.$route.query.price;
-      this.sortByPrice(this.maxPrice);
-    }
+    this.$router
+      .push({
+        path: "/filter",
+        query: { category: this.currentCategory, price: this.maxPrice },
+      })
+      .catch((error) => {
+        if (error.name != "NavigationDuplicated") {
+          throw error;
+        }
+      })
+      .finally(() => {
+        if ("category" in this.$route.query) {
+          this.currentCategory = this.$route.query.category;
+          if (this.currentCategory !== "all") {
+            this.sortByCategory(this.currentCategory);
+          } else {
+            this.setSortedProducts(this.products);
+          }
+        }
+        if ("price" in this.$route.query) {
+          this.maxPrice = this.$route.query.price;
+          this.sortByPrice(this.maxPrice);
+        }
+      });
   },
   computed: {
     categoriesList() {
