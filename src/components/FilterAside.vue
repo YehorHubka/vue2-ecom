@@ -21,7 +21,7 @@
           type="range"
           :min="priceMinMaxValues.min"
           :max="priceMinMaxValues.max"
-          step="50"
+          step="1"
           v-model="maxPrice"
         />
         <div class="value">({{ maxPrice }}$)</div>
@@ -32,6 +32,7 @@
 
 <script>
 import { mapState, mapMutations } from "vuex";
+import VueRouter from "vue-router";
 export default {
   data() {
     return {
@@ -42,6 +43,7 @@ export default {
   methods: {
     ...mapMutations(["sortByCategory", "setSortedProducts", "sortByPrice"]),
     filterChange() {
+      const { isNavigationFailure, NavigationFailureType } = VueRouter;
       this.$router
         .push({
           path: "/filter",
@@ -51,13 +53,32 @@ export default {
           if (error.name != "NavigationDuplicated") {
             throw error;
           }
+        })
+        .catch((failure) => {
+          if (isNavigationFailure(failure, NavigationFailureType.redirected)) {
+            showToast("Filter routing");
+          }
+        })
+        .finally(() => {
+          if ("category" in this.$route.query && "price" in this.$route.query) {
+            let params = {
+              category: this.$route.query.category,
+              price: this.$route.query.price,
+            };
+            localStorage.setItem("params", JSON.stringify(params));
+          }
+
+          this.currentCategory = JSON.parse(
+            localStorage.getItem("params") || "{}"
+          ).category;
+          this.currentCategory !== "all"
+            ? this.sortByCategory(this.currentCategory)
+            : this.setSortedProducts(this.products);
+          this.maxPrice = JSON.parse(
+            localStorage.getItem("params") || "{}"
+          ).price;
+          this.sortByPrice(this.maxPrice);
         });
-      if (this.currentCategory !== "all") {
-        this.sortByCategory(this.currentCategory);
-      } else {
-        this.setSortedProducts(this.products);
-      }
-      this.sortByPrice(this.maxPrice);
     },
   },
   watch: {
@@ -68,31 +89,18 @@ export default {
       this.filterChange();
     },
   },
+  created() {
+    let storageParams = JSON.parse(localStorage.getItem("params") || "{}");
+    let isEmpty = !Object.keys(storageParams).length;
+    if (!isEmpty) {
+      this.currentCategory = JSON.parse(
+        localStorage.getItem("params") || "{}"
+      ).category;
+      this.maxPrice = JSON.parse(localStorage.getItem("params") || "{}").price;
+    }
+  },
   mounted() {
-    this.$router
-      .push({
-        path: "/filter",
-        query: { category: this.currentCategory, price: this.maxPrice },
-      })
-      .catch((error) => {
-        if (error.name != "NavigationDuplicated") {
-          throw error;
-        }
-      })
-      .finally(() => {
-        if ("category" in this.$route.query) {
-          this.currentCategory = this.$route.query.category;
-          if (this.currentCategory !== "all") {
-            this.sortByCategory(this.currentCategory);
-          } else {
-            this.setSortedProducts(this.products);
-          }
-        }
-        if ("price" in this.$route.query) {
-          this.maxPrice = this.$route.query.price;
-          this.sortByPrice(this.maxPrice);
-        }
-      });
+    this.filterChange();
   },
   computed: {
     categoriesList() {
@@ -100,9 +108,10 @@ export default {
     },
     ...mapState(["products"]),
     priceMinMaxValues() {
+      let values = this.products.map((i) => i.price);
       return {
-        min: Math.min(...this.products.map((i) => i.price)),
-        max: Math.max(...this.products.map((i) => i.price)),
+        min: Math.min(...values),
+        max: Math.max(...values),
       };
     },
   },
